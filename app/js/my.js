@@ -346,6 +346,11 @@ function getX86Summary(isSingle){
 			x86CompleteResponse =  x86Response;
 			x86progress = 100;
 			progressBar(x86progress, p8progress);
+			if(isx86Complete && isp8Complete){
+				$('#loadingIcon').hide();
+				
+			}
+			
 		}
 	 }
 	 }
@@ -380,6 +385,10 @@ function getP8Summary(isSingle){
 				p8CompleteResponse = p8Response;
 				p8progress = 100;
 				progressBar(x86progress, p8progress);
+				if(isx86Complete && isp8Complete){
+				$('#loadingIcon').hide();
+				
+			}
 			}
 			
 		}
