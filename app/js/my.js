@@ -29,7 +29,10 @@ function ajaxErrorHandler(xhr, ajaxOptions, thrownError) {
 $(document).ready(function() {
 	$('#startTestBtn').bind('click', getPerfGraph);
 	//$('#getListBtn').bind('click', getSummary(x86CompleteResponse,p8CompleteResponse));
-	jQuery.support.cors = true;
+	$.support.cors = true;
+	$.mobile.allowCrossDomainPages = true;
+	$.mobile.phonegapNavigationEnabled = true
+	
 	$('#customers li[role!=heading]').remove();
 	$('#getListBtn').click(function(){
 		getSummary(x86CompleteResponse,p8CompleteResponse);
@@ -77,6 +80,7 @@ xhttp.onreadystatechange = function() {
 }
 xhttp.open("POST", "http://169.55.87.104:26199/trigger-magento-bench-marking-onx86", true);
 xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+//xhttp.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 xhttp.send(x86Data);
 
 var xhttp1 = new XMLHttpRequest();
@@ -101,8 +105,8 @@ function angularGauge(containerSpeed, containerRpm, stats) {
 	
    var avgValue, transPerSec;
    
-   var avgValue = parseInt(stats["averageTransactionTime"], 10);
-   //avgValue = Math.floor(rpmValue/1000);
+   var rpmValue = parseInt(stats["averageTransactionTime"], 10);
+   avgValue = Math.floor(rpmValue/100);
    transPerSec = parseInt(stats["transactionsPerSecond"], 10);
    var gaugeOptions = {
 
@@ -196,8 +200,8 @@ function angularGauge(containerSpeed, containerRpm, stats) {
     // The RPM gauge
     $(containerRpm).highcharts(Highcharts.merge(gaugeOptions, {
         yAxis: {
-            min: 500,
-            max: 2000,
+            min: 0.5,
+            max: 2.00,
             title: {
                 text: 'Trnx Time'
             }
@@ -212,7 +216,7 @@ function angularGauge(containerSpeed, containerRpm, stats) {
                        '<span style="font-size:12px;color:black">* ATT</span></div>'
             },
             tooltip: {
-                valueSuffix: ' Trans /ms'
+                valueSuffix: ' Trans /s'
             }
         }]
 
@@ -245,7 +249,7 @@ function progressBar(x86Percent, p8Percent) {
       text: ' % Complete'
     },
     xAxis: {
-      categories: [], 
+      categories: ['Status'], 
       title: {
 	text: null
       }
@@ -285,18 +289,18 @@ function progressBar(x86Percent, p8Percent) {
       enabled: false
     },	
     series: [{
-      name: 'Power8',
-      data: [p8Percent]
-      }, {
       name: 'X86',
       data: [x86Percent]
+    }, {
+      name: 'Power8',
+      data: [p8Percent]
     }]
   });	
    //setTimeout(progressBar, 5000);
 }
 
 function getSummary(x86Response, p8Response){
-	var tableData= "<table border='1'> <tr> <th> Parameter </th> <th> X86 </th> <th> Power8 </th> </tr>";
+	var tableData= "<table border='1' class='table'> <tr> <th> Parameter </th> <th> X86 </th> <th> Power8 </th> </tr>";
 	tableData = tableData + "<tr><td>User Count</td><td>"+x86_users+"</td><td>"+p8_users+"</td></tr>";
 	tableData = tableData + "<tr><td>Total Transaction</td><td>"+x86Response["totalTransaction"]+"</td><td>"+p8Response["totalTransaction"]+"</td></tr>";
 	tableData = tableData + "<tr><td>Total RunTime</td><td>"+x86Response["totalRunTime"]+"</td><td>"+p8Response["totalRunTime"]+"</td></tr>";
@@ -342,10 +346,11 @@ function getX86Summary(isSingle){
 			x86CompleteResponse =  x86Response;
 			x86progress = 100;
 			progressBar(x86progress, p8progress);
-            if(isx86Complete && isp8Complete){
-					$('#loadingIcon').hide();
+			if(isx86Complete && isp8Complete){
+				$('#loadingIcon').hide();
 				
-				}
+			}
+			
 		}
 	 }
 	 }
@@ -380,10 +385,10 @@ function getP8Summary(isSingle){
 				p8CompleteResponse = p8Response;
 				p8progress = 100;
 				progressBar(x86progress, p8progress);
-                if(isx86Complete && isp8Complete){
-					$('#loadingIcon').hide();
+				if(isx86Complete && isp8Complete){
+				$('#loadingIcon').hide();
 				
-				}
+			}
 			}
 			
 		}
