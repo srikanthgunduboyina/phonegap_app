@@ -1,9 +1,6 @@
 var gatewayURL = 'http://<none>/test-api';
-var x86Response = [], p8Response = [];
+var x86Response, p8Response;
 var x86_users, p8_users, timeInterval;
-var x86progress = 0, p8progress = 0;
-var isx86Complete =false, isp8Complete = false;
-var x86CompleteResponse = [], p8CompleteResponse = [];
 //var p8_users = document.getElementById('p8_uph').value;
 
 
@@ -28,39 +25,17 @@ function ajaxErrorHandler(xhr, ajaxOptions, thrownError) {
 
 $(document).ready(function() {
 	$('#startTestBtn').bind('click', getPerfGraph);
-	//$('#getListBtn').bind('click', getSummary(x86CompleteResponse,p8CompleteResponse));
-	$.support.cors = true;
-	$.mobile.allowCrossDomainPages = true;
-	$.mobile.phonegapNavigationEnabled = true
-	
+	$('#getListBtn').bind('click', getX86Summary(0));
+	jQuery.support.cors = true;
 	$('#customers li[role!=heading]').remove();
-	$('#getListBtn').click(function(){
-		getSummary(x86CompleteResponse,p8CompleteResponse);
-	});
+	
 });
 
 function getPerfGraph() {
-   clearGlobalVariables();
-   postUPH();
-   //getX86Summary(1, x86Stat);
-   //getP8Summary(1);
-   
-}
-
-function clearGlobalVariables() {
-	x86Response = [], p8Response = [];
-	x86_users ='', p8_users ='', timeInterval ='';
-	x86progress = 0, p8progress = 0;
-	isx86Complete =false, isp8Complete = false;
-	x86CompleteResponse = [], p8CompleteResponse = [];
-	var response = JSON.parse('{"averageTransactionTime":  "0", "transactionsPerSecond":  "0"}');
-    angularGauge("#container-speed", "#container-rpm", response);
-    angularGauge("#container-speed1", "#container-rpm1", response);
-	progressBar(x86progress, p8progress);
+   postUPH();   
 }
 
 function postUPH() {
-
   x86_users = document.getElementById('x86_uph').value;
   p8_users = document.getElementById('p8_uph').value;
   timeInterval = parseInt(document.getElementById('interval').value, 10) * 60;
@@ -73,31 +48,20 @@ function postUPH() {
 var xhttp = new XMLHttpRequest();
 xhttp.onreadystatechange = function() {
 	if (xhttp.readyState == 4 && (xhttp.status == 200 || xhttp.status == 201)) {
-		setTimeout(getX86Summary, 7000, 1);
-		//setInterval(getX86Summary(1), 6000);
-
-	}else{
-		
-		alert("Error = "+xhttp.status+", Status Text = "+xhttp.responseText);
+		setInterval(getX86Summary(1), 5000);
 	}
 }
-xhttp.open("POST", "http://169.55.87.104:26199/trigger-magento-bench-marking-onx86", true);
+xhttp.open("POST", "http://169.55.87.104:26199/trigger-magento-bench-marking-onx86", false);
 xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-//xhttp.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 xhttp.send(x86Data);
 
 var xhttp1 = new XMLHttpRequest();
 xhttp1.onreadystatechange = function() {
      if (xhttp1.readyState == 4 && xhttp1.status == 201) { 
- 		setTimeout(getP8Summary, 7000,1);
-		// setInterval(getP8Summary(1), 6000);
-
-	}else{
-		
-		alert("Error p8 = "+xhttp.status+", Status Text = "+xhttp.responseText);
+ 		setInterval(getP8Summary(1), 5000);
 	}
 }
-xhttp1.open("POST", "http://172.26.48.31:26199/trigger-magento-bench-marking-on-p8", true);
+xhttp1.open("POST", "http://172.26.48.31:26199/trigger-magento-bench-marking-on-p8", false);
 xhttp1.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 xhttp1.send(p8Data);
 }
@@ -110,11 +74,14 @@ function initGraphValues(avgValue, transPerSec){
 function angularGauge(containerSpeed, containerRpm, stats) {
 	
    var avgValue, transPerSec;
-   
+   initGraphValues(avgValue, transPerSec);
+
    var rpmValue = parseInt(stats["averageTransactionTime"], 10);
-   avgValue = Math.floor(rpmValue/100);
-   transPerSec = parseInt(stats["transactionsPerSecond"], 10);
-   var gaugeOptions = {
+   avgValue = isNaN(rpmValue) ? 0 : Math.floor(rpmValue/1000);
+   var tempVar = parseInt(stats["transactionsPerSecond"], 10);
+   transPerSec = isNaN(tempVar) ? 0 : tempVar;
+
+  var gaugeOptions = {
 
         chart: {
             type: 'solidgauge'
@@ -189,7 +156,7 @@ function angularGauge(containerSpeed, containerRpm, stats) {
             dataLabels: {
                 format: '<div style="text-align:center"><span style="font-size:25px;color:' +
                     ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
-                       '<span style="font-size:12px;color:black">TPS</span></div>'
+                       '<span style="font-size:12px;color:silver">TPS</span></div>'
             },
             tooltip: {
                 valueSuffix: ' TPS'
@@ -219,7 +186,7 @@ function angularGauge(containerSpeed, containerRpm, stats) {
             dataLabels: {
                 format: '<div style="text-align:center"><span style="font-size:25px;color:' +
                     ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y:.1f}</span><br/>' +
-                       '<span style="font-size:12px;color:black">* ATT</span></div>'
+                       '<span style="font-size:12px;color:silver">* Trnx/s</span></div>'
             },
             tooltip: {
                 valueSuffix: ' Trans /s'
@@ -232,18 +199,13 @@ function angularGauge(containerSpeed, containerRpm, stats) {
 
 }
 
-//function progressBar(x86Response, p8Response) {
-function progressBar(x86Percent, p8Percent) {
+function progressBar(x86Response, p8Response) {
 
-  /* tempX86 = x86Response["percentComplete"].replace( /[^\d.]/g, '')
-  var x86Percent = 10; //parseInt(tempX86, 10);
+  var tempX86 = x86Response["percentComplete"].replace( /[^\d.]/g, '')
+  var x86Percent = parseInt(tempX86, 10);
   var tempP8 = p8Response["percentComplete"].replace( /[^\d.]/g, '');
   var p8Percent = parseInt( tempP8, 10);
-  x86Percent = parseInt(x86Response["percentComplete"], 10);
-  p8Percent = parseInt(p8Response["percentComplete"], 10);*/
-  //x86Percent = x86Response["percentComplete"];
-  //p8Percent = p8Response["percentComplete"];
-  
+
   $('#stat-container').highcharts({
     chart: {
       type: 'bar'
@@ -260,8 +222,8 @@ function progressBar(x86Percent, p8Percent) {
 	text: null
       }
     },
-    yAxis: {     
-	  max: 100,
+    yAxis: {
+      min: 0,
       title: {
 	text: '',
 	align: 'high'
@@ -306,31 +268,34 @@ function progressBar(x86Percent, p8Percent) {
 }
 
 function getSummary(x86Response, p8Response){
-	var tableData= "<table border='1' class='table'> <tr> <th> Parameter </th> <th> X86 </th> <th> Power8 </th> </tr>";
-	tableData = tableData + "<tr><td>User Count</td><td>"+x86_users+"</td><td>"+p8_users+"</td></tr>";
-	tableData = tableData + "<tr><td>Total Transaction</td><td>"+x86Response["totalTransaction"]+"</td><td>"+p8Response["totalTransaction"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Total RunTime</td><td>"+x86Response["totalRunTime"]+"</td><td>"+p8Response["totalRunTime"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Transactions/Second</td><td>"+x86Response["transactionsPerSecond"]+"</td><td>"+p8Response["transactionsPerSecond"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Avg Transaction Time(msec)</td><td>"+x86Response["averageTransactionTime"]+"</td><td>"+p8Response["averageTransactionTime"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Min Transaction time(msec)</td><td>"+x86Response["minTransactionTime"]+"</td><td>"+p8Response["minTransactionTime"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Max Transaction time(msec)</td><td>"+x86Response["maxTransactionTime"]+"</td><td>"+p8Response["maxTransactionTime"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Total Errors</td><td>"+x86Response["totalNumberOfErrors"]+"</td><td>"+p8Response["totalNumberOfErrors"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Errors Percentage</td><td>"+x86Response["errorPercentage"]+"</td><td>"+p8Response["errorPercentage"]+"</td></tr>";
+	for(index in x86Response) {
+		var table = document.getElementById("container");
+		var row1 = table.insertRow(1);
+		var cell1 = row1.insertCell(0);
+		var cell2 = row1.insertCell(1);
+		var cell3 = row1.insertCell(2);
+		cell1.innerHTML = "Users Count";
+		cell2.innerHTML = x86_users;
+		cell3.innerHTML = p8_users;
+
 	
-	tableData= tableData+"</table>";
-	
-	$('#container').html(tableData);
+		var row2 = table.insertRow(2);
+		var cell4 = row2.insertCell(0);
+		var cell5 = row2.insertCell(1);
+		var cell6 = row2.insertCell(2);
+		cell4.innerHTML = index;
+		cell5.innerHTML = x86Response[index];
+		cell6.innerHTML = p8Response[index];
+    	 }	
 
 }
 
 function getX86Summary(isSingle){
   var items = [];
   var xhttp = new XMLHttpRequest();  
-  //alert('px86');
   xhttp.onreadystatechange = function() {
     if (xhttp.readyState == 4 && xhttp.status == 200) {   
 	 x86Response =  JSON.parse(xhttp.responseText);
-	 console.log('x86Response :'+x86Response);
 	 if(isSingle == 0) {
 	 	//var p8Response = {};
 	 	getP8Summary(0);
@@ -339,58 +304,36 @@ function getX86Summary(isSingle){
 	 else{
 	    var x86Gauge1 = "#container-speed";
 	    var x86Gauge2 = "#container-rpm";
-		//alert(x86Response);
 	    angularGauge(x86Gauge1, x86Gauge2, x86Response);
-		
+	    progressBar(x86Response, p8Response);
  	    if(x86Response["percentComplete"] != "100%"){
-			x86progress = x86Response["percentComplete"];
-			console.log('x86progress :'+x86progress);
-			progressBar(x86progress, p8progress);
-			setTimeout(getX86Summary, 6000, 1);
-		}else{
-			isx86Complete = true;
-			x86CompleteResponse =  x86Response;
-			x86progress = 100;
-			progressBar(x86progress, p8progress);
-		}
+				//setTimeout(getX86Summary(1, x86Response), 5000);
+	    }
 	 }
-	 }
+    }
   }
-  
   xhttp.open("GET", "http://169.55.87.104:26199/haswell-statistics", true);
   xhttp.send();
 
 }
 
 function getP8Summary(isSingle){
-	//alert('p8');
   var xhttpP8 = new XMLHttpRequest();
   xhttpP8.onreadystatechange = function() {
-  	if (xhttpP8.readyState == 4 && xhttpP8.status == 200) { 
-		console.log(xhttpP8.responseText);
+  	if (xhttpP8.readyState == 4 && xhttpP8.status == 200) {  
 		p8Response = JSON.parse(xhttpP8.responseText);
-		console.log('p8Response :'+p8Response);
 		if(isSingle == 1) {
 			var p8Gauge1 = "#container-speed1";
-	    	var p8Gauge2 = "#container-rpm1";
-			//alert(p8Response);
+	    		var p8Gauge2 = "#container-rpm1";
 	   		angularGauge(p8Gauge1, p8Gauge2, p8Response);
+			progressBar(x86Response, p8Response);
 			if(p8Response["percentComplete"] != "100%"){
-				//p8progress = p8Response["percentComplete"].replace( /[^\d.]/g, '');
-				p8progress = p8Response["percentComplete"];
-				console.log('p8progress :'+p8progress);
-				progressBar(x86progress, p8progress);
-				setTimeout(getP8Summary, 6000, 1);
-			}else{
-				isp8Complete = true;
-				p8CompleteResponse = p8Response;
-				p8progress = 100;
-				progressBar(x86progress, p8progress);
+				//setTimeout(getP8Summary(1, p8Response), 5000);
 			}
 			
 		}
-		
-	}
+
+     	}
    }
    xhttpP8.open("GET", "http://172.26.48.31:26199/power8-statistics", true);
    xhttpP8.send();

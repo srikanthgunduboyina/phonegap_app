@@ -1,10 +1,4 @@
 var gatewayURL = 'http://<none>/test-api';
-var x86Response = [], p8Response = [];
-var x86_users, p8_users, timeInterval;
-var x86progress = 0, p8progress = 0;
-var isx86Complete =false, isp8Complete = false;
-var x86CompleteResponse = [], p8CompleteResponse = [];
-//var p8_users = document.getElementById('p8_uph').value;
 
 
 
@@ -27,94 +21,51 @@ function ajaxErrorHandler(xhr, ajaxOptions, thrownError) {
 }
 
 $(document).ready(function() {
+//	$('#getListBtn').bind('click', getCustomers);
 	$('#startTestBtn').bind('click', getPerfGraph);
-	//$('#getListBtn').bind('click', getSummary(x86CompleteResponse,p8CompleteResponse));
-	$.support.cors = true;
-	$.mobile.allowCrossDomainPages = true;
-	$.mobile.phonegapNavigationEnabled = true
-	
+	$('#getListBtn').bind('click', getSummary);
+	jQuery.support.cors = true;
 	$('#customers li[role!=heading]').remove();
-	$('#getListBtn').click(function(){
-		getSummary(x86CompleteResponse,p8CompleteResponse);
-	});
+	
 });
 
 function getPerfGraph() {
-   clearGlobalVariables();
    postUPH();
-   //getX86Summary(1, x86Stat);
-   //getP8Summary(1);
-   
-}
 
-function clearGlobalVariables() {
-	x86Response = [], p8Response = [];
-	x86_users ='', p8_users ='', timeInterval ='';
-	x86progress = 0, p8progress = 0;
-	isx86Complete =false, isp8Complete = false;
-	x86CompleteResponse = [], p8CompleteResponse = [];
-	var response = JSON.parse('{"averageTransactionTime":  "0", "transactionsPerSecond":  "0"}');
-    angularGauge("#container-speed", "#container-rpm", response);
-    angularGauge("#container-speed1", "#container-rpm1", response);
-	progressBar(x86progress, p8progress);
+   var x86Gauge1 = "#container-speed";
+   var x86Gauge2 = "#container-rpm";
+   angularGauge(x86Gauge1, x86Gauge2);
+
+   var p8Gauge1 = "#container-speed1";
+   var p8Gauge2 = "#container-rpm1";
+   angularGauge(p8Gauge1, p8Gauge2);
+
+   progressBar();
 }
 
 function postUPH() {
-
-  x86_users = document.getElementById('x86_uph').value;
-  p8_users = document.getElementById('p8_uph').value;
-  timeInterval = parseInt(document.getElementById('interval').value, 10) * 60;
-
-
-  var x86Data = JSON.stringify({"noOfUsers": x86_users, "durationOfTests": timeInterval});
-
-  var p8Data = JSON.stringify({"noOfUsers": p8_users, "durationOfTests": timeInterval});
-
-var xhttp = new XMLHttpRequest();
-xhttp.onreadystatechange = function() {
-	if (xhttp.readyState == 4 && (xhttp.status == 200 || xhttp.status == 201)) {
-		setTimeout(getX86Summary, 7000, 1);
-		//setInterval(getX86Summary(1), 6000);
-
-	}else{
-		
-		alert("Error = "+xhttp.status+", Status Text = "+xhttp.responseText);
-	}
-}
-xhttp.open("POST", "http://169.55.87.104:26199/trigger-magento-bench-marking-onx86", true);
-xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-//xhttp.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-xhttp.send(x86Data);
-
-var xhttp1 = new XMLHttpRequest();
-xhttp1.onreadystatechange = function() {
-     if (xhttp1.readyState == 4 && xhttp1.status == 201) { 
- 		setTimeout(getP8Summary, 7000,1);
-		// setInterval(getP8Summary(1), 6000);
-
-	}else{
-		
-		alert("Error p8 = "+xhttp.status+", Status Text = "+xhttp.responseText);
-	}
-}
-xhttp1.open("POST", "http://172.26.48.31:26199/trigger-magento-bench-marking-on-p8", true);
-xhttp1.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-xhttp1.send(p8Data);
+	$.ajax({
+		url : "http://169.55.87.104:8888/trigger-magento-bench-marking-onx86",
+		cache : false,
+		type : 'POST',
+		contentType : 'application/json',
+		data : JSON.stringify({
+			'noOfUsers' : $('#uph').val(),
+		}),
+		success : function(data, status, xhr) {
+			jQuery.mobile.hidePageLoadingMsg();
+			alert("success");
+			//onPostCustomers(data);
+		},
+		error : function(xhr, status, errorThrown) {
+			jQuery.mobile.hidePageLoadingMsg();
+			//onPostCustomers(xhr);
+		}
+	});
 }
 
-function initGraphValues(avgValue, transPerSec){
-	avgValue = 0;
-	transPerSec = 0;
-}
-
-function angularGauge(containerSpeed, containerRpm, stats) {
-	
-   var avgValue, transPerSec;
-   
-   var rpmValue = parseInt(stats["averageTransactionTime"], 10);
-   avgValue = Math.floor(rpmValue/100);
-   transPerSec = parseInt(stats["transactionsPerSecond"], 10);
-   var gaugeOptions = {
+function angularGauge(containerSpeed, containerRpm) {
+  var gaugeOptions = {
 
         chart: {
             type: 'solidgauge'
@@ -175,7 +126,7 @@ function angularGauge(containerSpeed, containerRpm, stats) {
             min: 0,
             max: 100,
             title: {
-                text: 'TPS'
+                text: 'Speed'
             }
         },
 
@@ -184,66 +135,87 @@ function angularGauge(containerSpeed, containerRpm, stats) {
         },
 
         series: [{
-            name: 'TPS',
-            data: [transPerSec],
+            name: 'Speed',
+            data: [80],
             dataLabels: {
                 format: '<div style="text-align:center"><span style="font-size:25px;color:' +
                     ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
-                       '<span style="font-size:12px;color:black">TPS</span></div>'
+                       '<span style="font-size:12px;color:silver">users/h</span></div>'
             },
             tooltip: {
-                valueSuffix: ' TPS'
+                valueSuffix: ' users/h'
             }
         }]
 
     }));
-
-	var chart = $(containerSpeed).highcharts(),
-            point,
-            newVal,
-            inc;
 
     // The RPM gauge
     $(containerRpm).highcharts(Highcharts.merge(gaugeOptions, {
         yAxis: {
-            min: 0.5,
-            max: 2.00,
+            min: 0,
+            max: 5,
             title: {
-                text: 'Trnx Time'
+                text: 'RPM'
             }
         },
 
         series: [{
-            name: 'Trnx Time',
-            data: [avgValue],
+            name: 'RPM',
+            data: [1],
             dataLabels: {
                 format: '<div style="text-align:center"><span style="font-size:25px;color:' +
                     ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y:.1f}</span><br/>' +
-                       '<span style="font-size:12px;color:black">* ATT</span></div>'
+                       '<span style="font-size:12px;color:silver">* trans / s</span></div>'
             },
             tooltip: {
-                valueSuffix: ' Trans /s'
+                valueSuffix: ' Trans Time'
             }
         }]
 
     }));
 
-    
+    // Bring life to the dials
+    setInterval(function () {
+        // Speed
+        var chart = $(containerSpeed).highcharts(),
+            point,
+            newVal,
+            inc;
+
+        if (chart) {
+            point = chart.series[0].points[0];
+            inc = Math.round((Math.random() - 0.5) * 100);
+            newVal = point.y + inc;
+
+            if (newVal < 0 || newVal > 100) {
+                newVal = point.y - inc;
+            }
+
+            point.update(newVal);
+        }
+
+        // RPM
+        chart = $(containerRpm).highcharts();
+        if (chart) {
+            point = chart.series[0].points[0];
+            inc = Math.random() - 0.5;
+            newVal = point.y + inc;
+
+            if (newVal < 0 || newVal > 5) {
+                newVal = point.y - inc;
+            }
+
+            point.update(newVal);
+        }
+    }, 2000);
 
 }
 
-//function progressBar(x86Response, p8Response) {
-function progressBar(x86Percent, p8Percent) {
+function progressBar() {
 
-  /* tempX86 = x86Response["percentComplete"].replace( /[^\d.]/g, '')
-  var x86Percent = 10; //parseInt(tempX86, 10);
-  var tempP8 = p8Response["percentComplete"].replace( /[^\d.]/g, '');
-  var p8Percent = parseInt( tempP8, 10);
-  x86Percent = parseInt(x86Response["percentComplete"], 10);
-  p8Percent = parseInt(p8Response["percentComplete"], 10);*/
-  //x86Percent = x86Response["percentComplete"];
-  //p8Percent = p8Response["percentComplete"];
-  
+	// Ajax call to get the %completion 
+//  var jsonVal = $.getJSON("http://169.55.87.104:8888/haswell-statistics")
+
   $('#stat-container').highcharts({
     chart: {
       type: 'bar'
@@ -252,16 +224,16 @@ function progressBar(x86Percent, p8Percent) {
       text: 'Progress Bar'
     },
     subtitle: {
-      text: ' % Complete'
+      text: 'No of Users Finished %'
     },
     xAxis: {
-      categories: ['Status'], 
+      categories: ['Test Status'], 
       title: {
 	text: null
       }
     },
-    yAxis: {     
-	  max: 100,
+    yAxis: {
+      min: 0,
       title: {
 	text: '',
 	align: 'high'
@@ -296,105 +268,58 @@ function progressBar(x86Percent, p8Percent) {
     },	
     series: [{
       name: 'X86',
-      data: [x86Percent]
+      data: [65]
     }, {
       name: 'Power8',
-      data: [p8Percent]
+      data: [84]
     }]
   });	
    //setTimeout(progressBar, 5000);
 }
 
-function getSummary(x86Response, p8Response){
-	var tableData= "<table border='1' class='table'> <tr> <th> Parameter </th> <th> X86 </th> <th> Power8 </th> </tr>";
-	tableData = tableData + "<tr><td>User Count</td><td>"+x86_users+"</td><td>"+p8_users+"</td></tr>";
-	tableData = tableData + "<tr><td>Total Transaction</td><td>"+x86Response["totalTransaction"]+"</td><td>"+p8Response["totalTransaction"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Total RunTime</td><td>"+x86Response["totalRunTime"]+"</td><td>"+p8Response["totalRunTime"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Transactions/Second</td><td>"+x86Response["transactionsPerSecond"]+"</td><td>"+p8Response["transactionsPerSecond"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Avg Transaction Time(msec)</td><td>"+x86Response["averageTransactionTime"]+"</td><td>"+p8Response["averageTransactionTime"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Min Transaction time(msec)</td><td>"+x86Response["minTransactionTime"]+"</td><td>"+p8Response["minTransactionTime"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Max Transaction time(msec)</td><td>"+x86Response["maxTransactionTime"]+"</td><td>"+p8Response["maxTransactionTime"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Total Errors</td><td>"+x86Response["totalNumberOfErrors"]+"</td><td>"+p8Response["totalNumberOfErrors"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Errors Percentage</td><td>"+x86Response["errorPercentage"]+"</td><td>"+p8Response["errorPercentage"]+"</td></tr>";
-	
-	tableData= tableData+"</table>";
-	
-	$('#container').html(tableData);
-
-}
-
-function getX86Summary(isSingle){
+function getSummary(){
   var items = [];
-  var xhttp = new XMLHttpRequest();  
-  //alert('px86');
+  var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
-    if (xhttp.readyState == 4 && xhttp.status == 200) {   
-	 x86Response =  JSON.parse(xhttp.responseText);
-	 console.log('x86Response :'+x86Response);
-	 if(isSingle == 0) {
-	 	//var p8Response = {};
-	 	getP8Summary(0);
-	 	getSummary(x86Response, p8Response);	 
-	 }
-	 else{
-	    var x86Gauge1 = "#container-speed";
-	    var x86Gauge2 = "#container-rpm";
-		//alert(x86Response);
-	    angularGauge(x86Gauge1, x86Gauge2, x86Response);
-		
- 	    if(x86Response["percentComplete"] != "100%"){
-			x86progress = x86Response["percentComplete"];
-			console.log('x86progress :'+x86progress);
-			progressBar(x86progress, p8progress);
-			setTimeout(getX86Summary, 6000, 1);
-		}else{
-			isx86Complete = true;
-			x86CompleteResponse =  x86Response;
-			x86progress = 100;
-			progressBar(x86progress, p8progress);
-		}
-	 }
-	 }
+    if (xhttp.readyState == 4 && xhttp.status == 200) {
+      //document.getElementById("container").innerHTML = xhttp.responseText;
+	//alert(xhttp.responseText);
+	var x86Response =  JSON.parse(xhttp.responseText);
+	console.log(x86Response);
+	//$.each( x86Response, function( index, item ) {
+	for(index in x86Response) {
+		var table = document.getElementById("container");	
+		var row = table.insertRow(1);
+		var cell1 = row.insertCell(0);
+		var cell2 = row.insertCell(1);
+		cell1.innerHTML = index;
+		cell2.innerHTML = x86Response[index];    	
+   
+    	}
+
+	 //document.getElementById("container").appendChild(items);
+    	//$('#container').append(items);
+    }
   }
-  
-  xhttp.open("GET", "http://169.55.87.104:26199/haswell-statistics", true);
-  xhttp.send();
+  xhttp.open("GET", "http://169.55.87.104:8888/haswell-statistics", true);
+  var response = xhttp.send();
+  console.log(xhttp.responseText);
+     
+  //var jsonVal = $.getJSON("summary_data.json", function( result ) //{
+// var result2 = "response for p8 server";
 
-}
+  //var jsonVal = $.getJSON("http://169.55.87.104:8888/haswell-statistics", function(result) {
+//	console.log(result);
+var x86_result = {"totalTransaction":"682","totalRunTime":"60.3s","transactionsPerSecond":"11.3\/s","averageTransactionTime":"185","minTransactionTime":"0","maxTransactionTime":"10809","totalNumberOfErrors":"2","errorPercentage":"(0.29%)","percentComplete":"100%","_links":{"self":{"href":"http:\/\/169.55.87.104:8888\/haswell-statistics"}}};
+var p8_result = {"totalTransaction":"600","totalRunTime":"62.3s","transactionsPerSecond":"14.3\/s","averageTransactionTime":"150","minTransactionTime":"0","maxTransactionTime":"10809","totalNumberOfErrors":"4","errorPercentage":"(0.29%)","percentComplete":"80%","_links":{"self":{"href":"http:\/\/169.55.87.104:8888\/haswell-statistics"}}};
 
-function getP8Summary(isSingle){
-	//alert('p8');
-  var xhttpP8 = new XMLHttpRequest();
-  xhttpP8.onreadystatechange = function() {
-  	if (xhttpP8.readyState == 4 && xhttpP8.status == 200) { 
-		console.log(xhttpP8.responseText);
-		p8Response = JSON.parse(xhttpP8.responseText);
-		console.log('p8Response :'+p8Response);
-		if(isSingle == 1) {
-			var p8Gauge1 = "#container-speed1";
-	    	var p8Gauge2 = "#container-rpm1";
-			//alert(p8Response);
-	   		angularGauge(p8Gauge1, p8Gauge2, p8Response);
-			if(p8Response["percentComplete"] != "100%"){
-				//p8progress = p8Response["percentComplete"].replace( /[^\d.]/g, '');
-				p8progress = p8Response["percentComplete"];
-				console.log('p8progress :'+p8progress);
-				progressBar(x86progress, p8progress);
-				setTimeout(getP8Summary, 6000, 1);
-			}else{
-				isp8Complete = true;
-				p8CompleteResponse = p8Response;
-				p8progress = 100;
-				progressBar(x86progress, p8progress);
-			}
-			
-		}
-		
-	}
-   }
-   xhttpP8.open("GET", "http://172.26.48.31:26199/power8-statistics", true);
-   xhttpP8.send();
-
+ 	 
+    	
+ 			
+	//});
+	//if(x86_result[percentComplete] != 100) {
+	// setTimeout(getSummary, 5000);
+	//}
 }
 
 $(document).bind(
