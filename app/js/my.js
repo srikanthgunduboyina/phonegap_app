@@ -76,9 +76,6 @@ xhttp.onreadystatechange = function() {
 		setTimeout(getX86Summary, 7000, 1);
 		//setInterval(getX86Summary(1), 6000);
 
-	}else{
-		
-		alert("Error = "+xhttp.status+", Status Text = "+xhttp.responseText);
 	}
 }
 xhttp.open("POST", "http://169.55.87.104:26199/trigger-magento-bench-marking-onx86", true);
@@ -92,9 +89,6 @@ xhttp1.onreadystatechange = function() {
  		setTimeout(getP8Summary, 7000,1);
 		// setInterval(getP8Summary(1), 6000);
 
-	}else{
-		
-		alert("Error p8 = "+xhttp.status+", Status Text = "+xhttp.responseText);
 	}
 }
 xhttp1.open("POST", "http://172.26.48.31:26199/trigger-magento-bench-marking-on-p8", true);

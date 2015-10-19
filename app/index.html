@@ -4,17 +4,134 @@
     <title></title>
     <meta charset="utf-8">
 
-    <link href="kendo/styles/kendo.mobile.all.min.css" rel="stylesheet">
-    <link href="styles/main.css" rel="stylesheet">
+   <meta http-equiv="Access-Control-Allow-Origin" content="*">
+<meta http-equiv="Content-Security-Policy" content="default-src *; style-src * 'unsafe-inline'; script-src * 'unsafe-inline'; media-src *">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<link rel="stylesheet" href="style/jquery.mobile-1.3.1.min.css">
+<link rel="stylesheet" href="style/my.css">
+<script src="js/jquery-1.9.1.min.js"></script>
 
     <script src="cordova.js"></script>
-    <script src="kendo/js/jquery.min.js"></script>
-    <script src="kendo/js/kendo.mobile.min.js"></script>
+   
     <script src="scripts/app.js"></script>
+    <script src="js/jquery.mobile-1.3.1.min.js"></script>
+    <script>
+   $(document).bind('mobileinit',function(){
+    $.mobile.changePage.defaults.changeHash = false;
+    $.mobile.hashListeningEnabled = false;
+    $.mobile.pushStateEnabled = false;
+});
+</script>
+<!--script src="cordova.js"></script-->
+    <script src="js/my.js"></script>
+    <script src="js/highcharts.js"></script>
+    <script src="js/exporting.js"></script>
+    <script src="js/highcharts-more.js" ></script>
+    <script src="js/solid-gauge.js"></script>
+    <script src="js/bootstrap.js"></script>
+
 </head>
 <body>
-    <div data-role="view">
-
+<div data-role="page" data-control-title="Index" id="page1">
+    <div data-theme="a" data-role="header">
+        <h3>
+            Turbo LAMP Mobile Demo
+        </h3>
     </div>
+    <div data-role="content">
+	<div id="summary">
+	  <h4> Turbo LAMP Mobile App </h4>
+		<p>
+	  Welcome! This app demonstrates performance advantages of IBM Turbo LAMP over commodity LAMP stack on x86 Haswell processor while running Magento benchmark.
+	 </p>
+     </div> 
+	<div class="span8" style="width:350px">
+	<div id="x86-uph" style="width:120px;float:left" class="span4" >	
+	  <label for="uph">
+		X86 Users
+	  </label>
+	  <input name="" id="x86_uph" placeholder="X86 Users" value="" type="text">
+	</div>
+	<div class="span4" style="width:120px;float:right;">
+	 <label for "p8_uph">
+		P8 Users
+	  </label>
+	  <input name="" id="p8_uph" placeholder="P8 Users" value="" type="text">
+	</div>
+	</div>
+	</br>
+</br>
+  <div data-role="fieldcontain" data-controltype="textinput">  	<label for="time_interval">
+	  Time Interval(min)
+	</label>
+	<input name="" id="interval" placeholder="min" value="" type="text">
+  </div>
+</div>
+        <a id="startTestBtn" data-role="button" href="#page2" style="margin-bottom:0px">
+            Start Test
+        </a>
+        <h3 id="errorMessage">
+            /messages/
+        </h3>
+ 	<h5>Powered By</h5>
+	<div id="poweredby" data-role="footer">
+	  <img id='partners' src="images/partner_logos.jpg" style="max-width:100%;max-height:100%;margin:auto;display:block;">
+	</div>
+    </div>
+</div>
+
+<div data-role="page" data-control-title="customerDetails" id="page2">
+    <div data-theme="a" data-role="header">
+        <h3>
+            Test Report
+        </h3>       
+    </div>
+    <img id="x86" src="images/intell-haswell.jpg">
+    <div style="width: 300px; height: 120px; margin-left: 0 auto" data-role="content">
+	<div id="container-speed" style="width: 150px; height: 100px; float: left">
+	</div>
+	<div id="container-rpm" style="width: 150px; height: 100px; float: left">
+	</div>
+    </div>
+ 
+ <img id="power8" src="images/Power8_small.jpeg">
+    <div style="width: 300px; height: 120px; margin-left: 0 auto" data-role="content">
+    	<div id="container-speed1" style="width: 150px; height: 100px; float: left"></div>
+	<div id="container-rpm1" style="width: 150px; height: 100px; float: left"></div>
+	</div>
+
+	    <div id="stat-container" data-role="content"  style="width: 360px; height: 200px" aria-valuemax="100">  
+	    </div>
+	<a id="getListBtn" data-role="button" href="#page3">
+		   Check Summary 
+		</a>
+</div>
+<div data-role="page" data-control-title="statSummary" id="page3">
+	<script type="text/javascript">
+    		if (/page3/.test(window.top.location.host)) {
+        document.write('<link rel="stylesheet" type="text/css" href="style/bootstrap.css" />');
+    		}
+	</script>
+   <!--link href="style/bootstrap.css" rel="stylesheet"-->
+
+    <div data-theme="a" data-role="header">
+        <h3>
+          Statistics Summary
+        </h3>
+	  <a data-role="button" href="#page1" data-icon="arrow-l" data-iconpos="left"
+        class="ui-btn-left">
+            Back to Start
+        </a>
+    </div>
+	
+     <div id='container'>
+      
+    </div>
+	
+	
+</div>
+        
 </body>
 </html>
