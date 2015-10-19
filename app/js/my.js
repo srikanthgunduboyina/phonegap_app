@@ -324,7 +324,7 @@ function getX86Summary(isSingle){
   xhttp.onreadystatechange = function() {
     if (xhttp.readyState == 4 && xhttp.status == 200) {   
 	 x86Response =  JSON.parse(xhttp.responseText);
-	 console.log('x86Response :'+x86Response);
+	 
 	 if(isSingle == 0) {
 	 	//var p8Response = {};
 	 	getP8Summary(0);
@@ -338,7 +338,7 @@ function getX86Summary(isSingle){
 		
  	    if(x86Response["percentComplete"] != "100%"){
 			x86progress = x86Response["percentComplete"];
-			console.log('x86progress :'+x86progress);
+			
 			progressBar(x86progress, p8progress);
 			setTimeout(getX86Summary, 6000, 1);
 		}else{
@@ -346,10 +346,7 @@ function getX86Summary(isSingle){
 			x86CompleteResponse =  x86Response;
 			x86progress = 100;
 			progressBar(x86progress, p8progress);
-			if(isx86Complete && isp8Complete){
-				$('#loadingIcon').hide();
-				
-			}
+			
 			
 		}
 	 }
@@ -366,9 +363,9 @@ function getP8Summary(isSingle){
   var xhttpP8 = new XMLHttpRequest();
   xhttpP8.onreadystatechange = function() {
   	if (xhttpP8.readyState == 4 && xhttpP8.status == 200) { 
-		console.log(xhttpP8.responseText);
+		
 		p8Response = JSON.parse(xhttpP8.responseText);
-		console.log('p8Response :'+p8Response);
+		
 		if(isSingle == 1) {
 			var p8Gauge1 = "#container-speed1";
 	    	var p8Gauge2 = "#container-rpm1";
@@ -377,7 +374,7 @@ function getP8Summary(isSingle){
 			if(p8Response["percentComplete"] != "100%"){
 				//p8progress = p8Response["percentComplete"].replace( /[^\d.]/g, '');
 				p8progress = p8Response["percentComplete"];
-				console.log('p8progress :'+p8progress);
+				
 				progressBar(x86progress, p8progress);
 				setTimeout(getP8Summary, 6000, 1);
 			}else{
@@ -385,10 +382,7 @@ function getP8Summary(isSingle){
 				p8CompleteResponse = p8Response;
 				p8progress = 100;
 				progressBar(x86progress, p8progress);
-				if(isx86Complete && isp8Complete){
-				$('#loadingIcon').hide();
 				
-			}
 			}
 			
 		}
