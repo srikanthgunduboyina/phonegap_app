@@ -1,3 +1,12 @@
 #errorMessage {
 	display: none;
 }
+.table-striped-column > tbody > tr td:nth-of-type(odd) {
+  background-color: #CCCCE0;
+}
+.table-striped-column > tbody > tr td:nth-of-type(even) {
+    background-color: #FFEB99;
+}
+.table-striped-column > tbody > tr th {
+    background-color: #B2c2B2;
+}
