@@ -29,10 +29,7 @@ function ajaxErrorHandler(xhr, ajaxOptions, thrownError) {
 $(document).ready(function() {
 	$('#startTestBtn').bind('click', getPerfGraph);
 	//$('#getListBtn').bind('click', getSummary(x86CompleteResponse,p8CompleteResponse));
-	$.support.cors = true;
-	$.mobile.allowCrossDomainPages = true;
-	$.mobile.phonegapNavigationEnabled = true
-	
+	jQuery.support.cors = true;
 	$('#customers li[role!=heading]').remove();
 	$('#getListBtn').click(function(){
 		getSummary(x86CompleteResponse,p8CompleteResponse);
@@ -80,7 +77,6 @@ xhttp.onreadystatechange = function() {
 }
 xhttp.open("POST", "http://169.55.87.104:26199/trigger-magento-bench-marking-onx86", true);
 xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-//xhttp.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 xhttp.send(x86Data);
 
 var xhttp1 = new XMLHttpRequest();
@@ -105,8 +101,8 @@ function angularGauge(containerSpeed, containerRpm, stats) {
 	
    var avgValue, transPerSec;
    
-   var rpmValue = parseInt(stats["averageTransactionTime"], 10);
-   avgValue = Math.floor(rpmValue/100);
+   var avgValue = parseInt(stats["averageTransactionTime"], 10);
+   //avgValue = Math.floor(rpmValue/1000);
    transPerSec = parseInt(stats["transactionsPerSecond"], 10);
    var gaugeOptions = {
 
@@ -192,31 +188,26 @@ function angularGauge(containerSpeed, containerRpm, stats) {
 
     }));
 
-	var chart = $(containerSpeed).highcharts(),
-            point,
-            newVal,
-            inc;
-
     // The RPM gauge
     $(containerRpm).highcharts(Highcharts.merge(gaugeOptions, {
         yAxis: {
-            min: 0.5,
-            max: 2.00,
+            min: 00,
+            max: 2000,
             title: {
-                text: 'Trnx Time'
+                text: 'ATT'
             }
         },
 
         series: [{
-            name: 'Trnx Time',
+            name: 'ATT',
             data: [avgValue],
             dataLabels: {
                 format: '<div style="text-align:center"><span style="font-size:25px;color:' +
-                    ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y:.1f}</span><br/>' +
+                    ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
                        '<span style="font-size:12px;color:black">* ATT</span></div>'
             },
             tooltip: {
-                valueSuffix: ' Trans /s'
+                valueSuffix: ' ATT'
             }
         }]
 
@@ -249,7 +240,7 @@ function progressBar(x86Percent, p8Percent) {
       text: ' % Complete'
     },
     xAxis: {
-      categories: ['Status'], 
+      categories: [], 
       title: {
 	text: null
       }
@@ -276,7 +267,8 @@ function progressBar(x86Percent, p8Percent) {
     },
     legend: {
       layout: 'vertical',
-      align: 'right',
+ 	 reversed: true,
+      align: 'left',
       verticalAlign: 'top',
       x: -20,
       y: 10,
@@ -291,8 +283,8 @@ function progressBar(x86Percent, p8Percent) {
     series: [{
       name: 'X86',
       data: [x86Percent]
-    }, {
-      name: 'Power8',
+      }, {
+      name: 'POWER8',
       data: [p8Percent]
     }]
   });	
@@ -300,16 +292,16 @@ function progressBar(x86Percent, p8Percent) {
 }
 
 function getSummary(x86Response, p8Response){
-	var tableData= "<table border='1' class='table'> <tr> <th> Parameter </th> <th> X86 </th> <th> Power8 </th> </tr>";
-	tableData = tableData + "<tr><td>User Count</td><td>"+x86_users+"</td><td>"+p8_users+"</td></tr>";
-	tableData = tableData + "<tr><td>Total Transaction</td><td>"+x86Response["totalTransaction"]+"</td><td>"+p8Response["totalTransaction"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Total RunTime</td><td>"+x86Response["totalRunTime"]+"</td><td>"+p8Response["totalRunTime"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Transactions/Second</td><td>"+x86Response["transactionsPerSecond"]+"</td><td>"+p8Response["transactionsPerSecond"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Avg Transaction Time(msec)</td><td>"+x86Response["averageTransactionTime"]+"</td><td>"+p8Response["averageTransactionTime"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Min Transaction time(msec)</td><td>"+x86Response["minTransactionTime"]+"</td><td>"+p8Response["minTransactionTime"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Max Transaction time(msec)</td><td>"+x86Response["maxTransactionTime"]+"</td><td>"+p8Response["maxTransactionTime"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Total Errors</td><td>"+x86Response["totalNumberOfErrors"]+"</td><td>"+p8Response["totalNumberOfErrors"]+"</td></tr>";
-	tableData = tableData + "<tr><td>Errors Percentage</td><td>"+x86Response["errorPercentage"]+"</td><td>"+p8Response["errorPercentage"]+"</td></tr>";
+	var tableData= "<table class=\"table table-bordered table-striped-column\" style=\"width:100%\"> <tr> <th align=\"left\"> Parameter </th> <th align=\"center\">X86</th> <th align=\"center\">Power8 </th> </tr>";
+	tableData = tableData + "<tr><td>User Count</td><td align=\"right\">"+x86_users+"</td><td align=\"right\">"+p8_users+"</td></tr>";
+	tableData = tableData + "<tr><td>Total Transaction</td><td align=\"right\">"+x86Response["totalTransaction"]+"</td><td align=\"right\">"+p8Response["totalTransaction"]+"</td></tr>";
+	tableData = tableData + "<tr><td>Total RunTime(sec)</td><td align=\"right\">"+x86Response["totalRunTime"]+"</td><td align=\"right\">"+p8Response["totalRunTime"]+"</td></tr>";
+	tableData = tableData + "<tr><td>Transactions/Second</td><td align=\"right\">"+x86Response["transactionsPerSecond"]+"</td><td align=\"right\">"+p8Response["transactionsPerSecond"]+"</td></tr>";
+	tableData = tableData + "<tr><td>Avg Transaction Time(msec)</td><td align=\"right\">"+x86Response["averageTransactionTime"]+"</td><td align=\"right\">"+p8Response["averageTransactionTime"]+"</td></tr>";
+	tableData = tableData + "<tr><td>Max Transaction time(msec)</td><td align=\"right\">"+x86Response["maxTransactionTime"]+"</td><td align=\"right\">"+p8Response["maxTransactionTime"]+"</td></tr>";
+	tableData = tableData + "<tr><td>Total Errors</td><td align=\"right\">"+x86Response["totalNumberOfErrors"]+"</td><td align=\"right\">"+p8Response["totalNumberOfErrors"]+"</td></tr>";
+	tableData = tableData + "<tr><td>Errors Percentage</td><td align=\"right\">"+x86Response["errorPercentage"]+"</td><td align=\"right\">"+p8Response["errorPercentage"]+"</td></tr>";
+
 	
 	tableData= tableData+"</table>";
 	
@@ -324,7 +316,7 @@ function getX86Summary(isSingle){
   xhttp.onreadystatechange = function() {
     if (xhttp.readyState == 4 && xhttp.status == 200) {   
 	 x86Response =  JSON.parse(xhttp.responseText);
-	 
+	 console.log('x86Response :'+x86Response);
 	 if(isSingle == 0) {
 	 	//var p8Response = {};
 	 	getP8Summary(0);
@@ -338,7 +330,7 @@ function getX86Summary(isSingle){
 		
  	    if(x86Response["percentComplete"] != "100%"){
 			x86progress = x86Response["percentComplete"];
-			
+			console.log('x86progress :'+x86progress);
 			progressBar(x86progress, p8progress);
 			setTimeout(getX86Summary, 6000, 1);
 		}else{
@@ -346,8 +338,6 @@ function getX86Summary(isSingle){
 			x86CompleteResponse =  x86Response;
 			x86progress = 100;
 			progressBar(x86progress, p8progress);
-			
-			
 		}
 	 }
 	 }
@@ -363,9 +353,9 @@ function getP8Summary(isSingle){
   var xhttpP8 = new XMLHttpRequest();
   xhttpP8.onreadystatechange = function() {
   	if (xhttpP8.readyState == 4 && xhttpP8.status == 200) { 
-		
+		console.log(xhttpP8.responseText);
 		p8Response = JSON.parse(xhttpP8.responseText);
-		
+		console.log('p8Response :'+p8Response);
 		if(isSingle == 1) {
 			var p8Gauge1 = "#container-speed1";
 	    	var p8Gauge2 = "#container-rpm1";
@@ -374,7 +364,7 @@ function getP8Summary(isSingle){
 			if(p8Response["percentComplete"] != "100%"){
 				//p8progress = p8Response["percentComplete"].replace( /[^\d.]/g, '');
 				p8progress = p8Response["percentComplete"];
-				
+				console.log('p8progress :'+p8progress);
 				progressBar(x86progress, p8progress);
 				setTimeout(getP8Summary, 6000, 1);
 			}else{
@@ -382,7 +372,6 @@ function getP8Summary(isSingle){
 				p8CompleteResponse = p8Response;
 				p8progress = 100;
 				progressBar(x86progress, p8progress);
-				
 			}
 			
 		}
