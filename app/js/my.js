@@ -281,12 +281,12 @@ function progressBar(x86Percent, p8Percent) {
       enabled: false
     },	
     series: [{
-      name: 'X86',
-      data: [x86Percent]
-      }, {
       name: 'POWER8',
       data: [p8Percent]
-    }]
+    }, {
+      name: 'X86',
+      data: [x86Percent]
+      }]
   });	
    //setTimeout(progressBar, 5000);
 }
